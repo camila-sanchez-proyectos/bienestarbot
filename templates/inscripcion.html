@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block titulo %}Inscripción · {{ act.nombre }} · BienestarBot{% endblock %}
+{% block contenido %}
+<main class="enroll">
+  <div class="wrap">
+    <div>
+      <h1>Inscripción en {{ act.nombre }}</h1>
+      <p class="lead">Llena el formulario para inscribirte. Antes de enviarlo, revisa la información de la actividad.</p>
+
+      <div class="summary">
+        <dl>
+          {% if tipo == 'deporte' %}
+          {% if act.categoria %}<div><dt>Categoría</dt><dd>{{ act.categoria }}</dd></div>{% endif %}
+          <div>
+            <dt>Entrenador</dt>
+            <dd>
+              {% if act.instructor %}
+                {{ act.instructor }}{% if act.especialidad %} · {{ act.especialidad }}{% endif %}
+                {% if act.contacto %}<br><span class="muted">Contacto: {{ act.contacto }}</span>{% endif %}
+              {% else %}Por confirmar con el área de Deportes{% endif %}
+            </dd>
+          </div>
+          <div>
+            <dt>Horarios y lugar</dt>
+            <dd>
+              {% if act.horarios %}
+              <ul>{% for h in act.horarios %}<li>{{ h.dias }} · {{ h.inicio }} a {{ h.fin }} · {{ h.lugar }}</li>{% endfor %}</ul>
+              {% else %}Por confirmar con el área de Deportes{% endif %}
+            </dd>
+          </div>
+          <div><dt>Cupos</dt><dd>{{ act.cupos_disponibles }} de {{ act.cupo_maximo }} libres</dd></div>
+          {% else %}
+          <div><dt>Fecha</dt><dd>{{ act.fecha_txt }}</dd></div>
+          <div><dt>Lugar</dt><dd>{{ act.lugar }}</dd></div>
+          <div><dt>Cupos</dt><dd>{{ act.cupos_disponibles }} de {{ act.capacidad }} libres</dd></div>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <form class="form" method="post">
+      <h2 class="form-title">Formulario de inscripción</h2>
+
+      <fieldset>
+        <legend>Tus datos</legend>
+        <div class="field"><label for="f-nombre">Nombre completo</label><input id="f-nombre" value="{{ current_user.nombre }}" readonly></div>
+        <div class="field"><label for="f-correo">Correo institucional</label><input id="f-correo" value="{{ current_user.correo }}" readonly></div>
+        <div class="field"><label for="f-carrera">Carrera</label><input id="f-carrera" value="{{ current_user.carrera or '' }}" readonly></div>
+        <div class="field"><label for="f-semestre">Semestre</label><input id="f-semestre" value="{{ current_user.semestre or '' }}" readonly></div>
+        <div class="field">
+          <label for="telefono">Teléfono de contacto</label>
+          <input id="telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" required placeholder="3001234567" value="{{ request.form.get('telefono', '') }}">
+        </div>
+      </fieldset>
+
+      {% if tipo == 'deporte' %}
+      <fieldset>
+        <legend>Sobre tu participación</legend>
+        {% if act.ramas %}
+        <div class="field">
+          <label for="rama">Rama</label>
+          <select id="rama" name="rama" required>
+            <option value="" disabled {% if not request.form.get('rama') %}selected{% endif %}>Elige la rama</option>
+            {% for r in act.ramas %}<option value="{{ r }}" {% if request.form.get('rama') == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <div class="field">
+          <label for="nivel">Experiencia en {{ act.nombre }}</label>
+          <select id="nivel" name="nivel" required>
+            <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Elige tu nivel</option>
+            {% for n in niveles %}<option value="{{ n }}" {% if request.form.get('nivel') == n %}selected{% endif %}>{{ n }}</option>{% endfor %}
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" name="interes_seleccion" value="1" {% if request.form.get('interes_seleccion') %}checked{% endif %}><span>Me interesa que me tengan en cuenta para la selección de la Universidad. <span class="hint">Todos los equipos tienen semillero; la selección la define el entrenador.</span></span></label>
+        {% if act.aplica_beca %}
+        <label class="check"><input type="checkbox" name="interes_beca" value="1" {% if request.form.get('interes_beca') %}checked{% endif %}><span>Me interesa la beca deportiva. <span class="hint">Para la prueba debes contactar al entrenador en el primer mes del semestre.</span></span></label>
+        {% endif %}
+      </fieldset>
+      {% endif %}
+
+      <fieldset>
+        <legend>Confirmaciones</legend>
+        <div class="field">
+          <label for="observaciones">Observaciones <span class="hint">(opcional)</span></label>
+          <textarea id="observaciones" name="observaciones" rows="3" maxlength="300">{{ request.form.get('observaciones', '') }}</textarea>
+        </div>
+        <label class="check"><input type="checkbox" name="declara_salud" value="1" required {% if request.form.get('declara_salud') %}checked{% endif %}><span>Declaro que mi estado de salud me permite practicar actividad física.</span></label>
+        <label class="check"><input type="checkbox" name="acepta_datos" value="1" required {% if request.form.get('acepta_datos') %}checked{% endif %}><span>Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012.</span></label>
+      </fieldset>
+
+      <button class="btn btn-primary" type="submit">Enviar inscripción</button>
+      <a class="btn btn-ghost" href="{{ url_for('panel') }}">Volver al panel</a>
+    </form>
+  </div>
+</main>
+{% endblock %}

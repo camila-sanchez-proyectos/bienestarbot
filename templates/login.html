@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión · BienestarBot{% endblock %}
+{% block contenido %}
+<main class="auth">
+  <div class="wrap">
+    <div>
+      <h1>Inicia sesión</h1>
+      <p class="lead">Entra con tu correo institucional para ver los deportes, inscribirte o cancelar desde el chat.</p>
+      <ul class="auth-points">
+        <li>Usa el mismo correo con el que te registraste.</li>
+        <li>Si todavía no tienes cuenta, crearla toma menos de un minuto.</li>
+      </ul>
+    </div>
+
+    <form class="form" method="post">
+      <h2 class="form-title">Tu cuenta</h2>
+
+      <div class="field">
+        <label for="correo">Correo institucional</label>
+        <input id="correo" name="correo" type="email" autocomplete="email" required placeholder="nombre@unisimon.edu.co" value="{{ request.form.get('correo', '') }}">
+      </div>
+
+      <div class="field">
+        <label for="contrasena">Contraseña</label>
+        <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" required>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Entrar</button>
+      <p class="form-alt">¿No tienes cuenta? <a href="{{ url_for('registro') }}">Regístrate</a></p>
+    </form>
+  </div>
+</main>
+{% endblock %}

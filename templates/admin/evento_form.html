@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar ' ~ evento.nombre if evento else 'Nuevo evento' }} · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+{% set v = request.form if request.method == 'POST' else (evento or {}) %}
+{% if request.method == 'POST' %}{% set fecha_valor = v.get('fecha_evento', '') %}
+{% elif evento %}{% set fecha_valor = evento.fecha_evento.strftime('%Y-%m-%dT%H:%M') %}
+{% else %}{% set fecha_valor = '' %}{% endif %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <div class="toolbar">
+        <h1>{{ 'Editar ' ~ evento.nombre if evento else 'Nuevo evento' }}</h1>
+        <a class="btn btn-ghost" href="{{ url_for('admin.eventos') }}">Volver a eventos</a>
+      </div>
+
+      <form class="form aform" method="post">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" maxlength="100" required value="{{ v.get('nombre', '') }}">
+        </div>
+        <div class="field">
+          <label for="descripcion">Descripción <span class="hint">(opcional)</span></label>
+          <textarea id="descripcion" name="descripcion" rows="3" maxlength="255">{{ v.get('descripcion') or '' }}</textarea>
+        </div>
+        <div class="field">
+          <label for="fecha_evento">Fecha y hora</label>
+          <input id="fecha_evento" name="fecha_evento" type="datetime-local" required {% if minimo %}min="{{ minimo }}"{% endif %} value="{{ fecha_valor }}">
+        </div>
+        <div class="field">
+          <label for="lugar">Lugar</label>
+          <input id="lugar" name="lugar" maxlength="100" required value="{{ v.get('lugar', '') }}">
+        </div>
+        <div class="field">
+          <label for="capacidad">Capacidad</label>
+          <input id="capacidad" name="capacidad" type="number" min="{{ n_ocupados or 1 }}" max="5000" required value="{{ v.get('capacidad', 50) }}">
+          {% if evento %}<span class="hint">Hay {{ n_ocupados }} {{ 'estudiante inscrito' if n_ocupados == 1 else 'estudiantes inscritos' }} ahora mismo.</span>{% endif %}
+        </div>
+        <button class="btn btn-primary" type="submit">{{ 'Guardar cambios' if evento else 'Crear evento' }}</button>
+      </form>
+    </section>
+
+    {% if evento %}
+    <section class="dsec">
+      <h2>Eliminar evento</h2>
+      <p class="intro">Solo se puede eliminar un evento que nunca tuvo inscripciones.</p>
+      <form method="post" action="{{ url_for('admin.evento_eliminar', idn=evento.id_evento) }}" onsubmit="return confirm('¿Eliminar {{ evento.nombre|e }}? Esta acción no se puede deshacer.')">
+        <button class="btn btn-danger" type="submit">Eliminar {{ evento.nombre }}</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

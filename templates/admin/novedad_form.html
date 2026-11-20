@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar novedad' if novedad else 'Nueva novedad' }} · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+{% set v = request.form if request.method == 'POST' else (novedad or {}) %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <div class="toolbar">
+        <h1>{{ 'Editar novedad' if novedad else 'Nueva novedad' }}</h1>
+        <a class="btn btn-ghost" href="{{ url_for('admin.novedades') }}">Volver a novedades</a>
+      </div>
+      <form class="form aform" method="post">
+        <div class="field"><label for="titulo">Título</label><input id="titulo" name="titulo" maxlength="100" required value="{{ v.get('titulo', '') }}"></div>
+        <div class="field"><label for="contenido">Contenido <span class="hint">(máximo 500 caracteres)</span></label><textarea id="contenido" name="contenido" rows="6" maxlength="500" required>{{ v.get('contenido', '') }}</textarea></div>
+        <button class="btn btn-primary" type="submit">{{ 'Guardar cambios' if novedad else 'Publicar novedad' }}</button>
+      </form>
+    </section>
+    {% if novedad %}
+    <section class="dsec">
+      <h2>Eliminar novedad</h2>
+      <form method="post" action="{{ url_for('admin.novedad_eliminar', idn=novedad.id) }}" onsubmit="return confirm('¿Eliminar esta novedad? Los estudiantes dejarán de verla.')">
+        <button class="btn btn-danger" type="submit">Eliminar novedad</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

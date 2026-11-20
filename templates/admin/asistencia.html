@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Asistencia · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <h1>Asistencia</h1>
+      <p class="intro">Elige un deporte o un evento para ver a sus inscritos y marcar quién asistió.</p>
+    </section>
+    <section class="dsec">
+      <h2>Deportes</h2>
+      {% if deportes %}
+      <div class="table-wrap"><table class="atable">
+        <thead><tr><th>Deporte</th><th>Inscritos</th><th></th></tr></thead>
+        <tbody>{% for d in deportes %}<tr>
+          <td><strong>{{ d.nombre }}</strong></td><td>{{ d.inscritos }}</td>
+          <td><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.asistencia_detalle', tipo='deporte', idn=d.id_deporte) }}">Registrar asistencia</a></td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+      {% else %}<p class="empty">Todavía no hay deportes.</p>{% endif %}
+    </section>
+    <section class="dsec">
+      <h2>Eventos</h2>
+      {% if eventos %}
+      <div class="table-wrap"><table class="atable">
+        <thead><tr><th>Evento</th><th>Fecha</th><th>Inscritos</th><th></th></tr></thead>
+        <tbody>{% for e in eventos %}<tr>
+          <td><strong>{{ e.nombre }}</strong></td><td>{{ e.fecha_evento|fecha_hora }}</td><td>{{ e.inscritos }}</td>
+          <td><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.asistencia_detalle', tipo='evento', idn=e.id_evento) }}">Registrar asistencia</a></td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+      {% else %}<p class="empty">Todavía no hay eventos.</p>{% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}

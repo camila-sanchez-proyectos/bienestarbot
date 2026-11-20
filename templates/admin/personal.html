@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}Personal · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <h1>Personal de Bienestar</h1>
+      <p class="intro">Aquí se crean las cuentas del personal que administra el área. Solo piden nombre, correo y contraseña.</p>
+      <form class="form aform" method="post">
+        <div class="field"><label for="nombre">Nombre completo</label><input id="nombre" name="nombre" maxlength="100" required value="{{ request.form.get('nombre', '') }}"></div>
+        <div class="field"><label for="correo">Correo institucional</label><input id="correo" name="correo" type="email" required placeholder="nombre@unisimon.edu.co" value="{{ request.form.get('correo', '') }}"></div>
+        <div class="field"><label for="contrasena">Contraseña <span class="hint">(mínimo 8 caracteres)</span></label><input id="contrasena" name="contrasena" type="password" minlength="8" autocomplete="new-password" required></div>
+        <button class="btn btn-primary" type="submit">Crear cuenta del personal</button>
+      </form>
+    </section>
+    <section class="dsec">
+      <h2>Cuentas del personal</h2>
+      {% if cuentas %}
+      <div class="table-wrap">
+        <table class="atable">
+          <thead><tr><th>Nombre</th><th>Correo</th></tr></thead>
+          <tbody>{% for c in cuentas %}<tr><td>{{ c.nombre }}</td><td>{{ c.correo_institucional }}</td></tr>{% endfor %}</tbody>
+        </table>
+      </div>
+      {% else %}<p class="empty">Todavía no hay cuentas del personal.</p>{% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}

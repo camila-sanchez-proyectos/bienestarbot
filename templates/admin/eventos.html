@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Eventos · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <div class="toolbar">
+        <h1>Eventos</h1>
+        <a class="btn btn-primary" href="{{ url_for('admin.evento_nuevo') }}">Nuevo evento</a>
+      </div>
+      {% if eventos %}
+      <div class="table-wrap">
+        <table class="atable">
+          <thead><tr><th>Evento</th><th>Fecha</th><th>Lugar</th><th>Cupos libres</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            {% for e in eventos %}
+            <tr>
+              <td><strong>{{ e.nombre }}</strong></td>
+              <td>{{ e.fecha_evento|fecha_hora }}</td>
+              <td>{{ e.lugar }}</td>
+              <td>{{ e.cupos_disponibles }} de {{ e.capacidad }}</td>
+              <td><span class="tag">{{ 'Realizado' if e.fecha_evento < ahora else 'Próximo' }}</span></td>
+              <td><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.evento_editar', idn=e.id_evento) }}">Editar</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty">Todavía no hay eventos. Crea el primero con el botón «Nuevo evento».</p>
+      {% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}

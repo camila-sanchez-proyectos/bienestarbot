@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Comentarios · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <h1>Comentarios de los estudiantes</h1>
+      <p class="intro">Sugerencias y comentarios enviados desde el panel o desde el chat.</p>
+      {% if comentarios %}
+      <ul class="comments">
+        {% for c in comentarios %}
+        <li>
+          <p>{{ c.texto }}</p>
+          <span class="muted">{{ c.autor }} · {{ c.correo }}{% if c.carrera_autor %} · {{ c.carrera_autor }}{% endif %}{% if c.fecha %} · {{ c.fecha|fecha_hora }}{% endif %}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">Todavía no hay comentarios.</p>
+      {% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}

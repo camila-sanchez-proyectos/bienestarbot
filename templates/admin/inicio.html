@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <section class="dash-hero">
+    <div class="wrap">
+      <h1>Hola, {{ current_user.nombre|nombre_corto }}</h1>
+      <span class="badge">{{ current_user.rol }}</span>
+      <p class="lead">Desde aquí gestionas la oferta del área de Deportes: los deportes con sus horarios y entrenadores, y los eventos. Lo que cambies se ve de inmediato en el panel de los estudiantes y en el chat.</p>
+    </div>
+  </section>
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <ul class="stats">
+        <li class="t-mint"><strong>{{ n_deportes }}</strong><span>Deportes</span></li>
+        <li class="t-butter"><strong>{{ n_eventos }}</strong><span>Eventos próximos</span></li>
+        <li class="t-sky"><strong>{{ n_inscritos }}</strong><span>Inscripciones activas</span></li>
+        <li class="t-peach"><strong>{{ n_comentarios }}</strong><span>Comentarios recibidos</span></li>
+      </ul>
+    </section>
+    <section class="dsec">
+      <h2>¿Qué quieres hacer?</h2>
+      <div class="actions">
+        <a class="btn btn-primary" href="{{ url_for('admin.deportes') }}">Gestionar deportes</a>
+        <a class="btn btn-primary" href="{{ url_for('admin.eventos') }}">Gestionar eventos</a>
+        <a class="btn btn-primary" href="{{ url_for('admin.asistencia') }}">Registrar asistencia</a>
+        <a class="btn btn-primary" href="{{ url_for('admin.novedades') }}">Publicar novedades</a>
+        <a class="btn btn-primary" href="{{ url_for('admin.comentarios') }}">Leer comentarios</a>
+        <a class="btn btn-ghost" href="{{ url_for('panel') }}">Ver el panel como lo ven los estudiantes</a>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta · BienestarBot{% endblock %}
+{% block contenido %}
+<main class="auth">
+  <div class="wrap">
+    <div>
+      <h1>Crea tu cuenta</h1>
+      <p class="lead">Con tu cuenta puedes ver los deportes, inscribirte y cancelar desde el chat de BienestarBot.</p>
+      <ul class="auth-points">
+        <li>Solo se registran estudiantes con correo institucional (@unisimon.edu.co).</li>
+        <li>No puedes inscribirte dos veces en la misma actividad.</li>
+        <li>Tus datos personales se tratan conforme a la Ley 1581 de 2012.</li>
+      </ul>
+    </div>
+
+    <form class="form" method="post">
+      <h2 class="form-title">Datos de tu cuenta</h2>
+
+      <div class="field">
+        <label for="nombre">Nombre completo</label>
+        <input id="nombre" name="nombre" autocomplete="name" required value="{{ request.form.get('nombre', '') }}">
+      </div>
+
+      <div class="field">
+        <label for="correo">Correo institucional</label>
+        <input id="correo" name="correo" type="email" autocomplete="email" required placeholder="nombre@unisimon.edu.co" value="{{ request.form.get('correo', '') }}">
+      </div>
+
+      <div class="field">
+        <label for="carrera">Carrera</label>
+        <select id="carrera" name="carrera" required>
+          <option value="" disabled {% if not request.form.get('carrera') %}selected{% endif %}>Elige tu carrera</option>
+          {% for c in carreras %}
+            <option value="{{ c }}" {% if request.form.get('carrera') == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="semestre">Semestre</label>
+        <select id="semestre" name="semestre" required>
+          <option value="" disabled {% if not request.form.get('semestre') %}selected{% endif %}>Elige tu semestre</option>
+          {% for s in semestres %}
+            <option value="{{ s }}" {% if request.form.get('semestre') == s|string %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="contrasena">Contraseña <span class="hint">(mínimo 8 caracteres)</span></label>
+        <input id="contrasena" name="contrasena" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Registrarme</button>
+      <p class="form-alt">¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+    </form>
+  </div>
+</main>
+{% endblock %}

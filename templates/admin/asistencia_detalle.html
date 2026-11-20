@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Asistencia · {{ actividad.nombre }} · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <div class="toolbar">
+        <h1>Asistencia · {{ actividad.nombre }}</h1>
+        <a class="btn btn-ghost" href="{{ url_for('admin.asistencia') }}">Volver</a>
+      </div>
+      {% if tipo == 'evento' %}<p class="intro">Fecha: {{ actividad.fecha_evento|fecha_hora }} · Lugar: {{ actividad.lugar }}</p>{% endif %}
+      <ul class="stats">
+        <li class="t-sky"><strong>{{ conteo.asistio }}</strong><span>Asistieron</span></li>
+        <li class="t-coral"><strong>{{ conteo.no_asistio }}</strong><span>No asistieron</span></li>
+        <li class="t-butter"><strong>{{ conteo.inscrito }}</strong><span>Pendientes</span></li>
+      </ul>
+    </section>
+    <section class="dsec">
+      {% if inscritos %}
+      <form method="post">
+        <div class="table-wrap"><table class="atable">
+          <thead><tr><th>Estudiante</th><th>Carrera y semestre</th><th>Teléfono</th><th>Asistencia</th></tr></thead>
+          <tbody>
+            {% for i in inscritos %}
+            <tr>
+              <td><strong>{{ i.nombre }}</strong><br><span class="muted">{{ i.correo_institucional }}</span></td>
+              <td>{{ i.carrera or '—' }}{% if i.semestre %} · {{ i.semestre }}.º{% endif %}</td>
+              <td>{{ i.telefono or '—' }}</td>
+              <td>
+                <select name="estado_{{ i.id_inscripcion }}" aria-label="Asistencia de {{ i.nombre }}">
+                  {% for valor, texto in estados %}<option value="{{ valor }}" {% if i.estado == valor %}selected{% endif %}>{{ texto }}</option>{% endfor %}
+                </select>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table></div>
+        <div class="actions"><button class="btn btn-primary" type="submit">Guardar asistencia</button></div>
+      </form>
+      {% else %}
+      <p class="empty">Todavía no hay estudiantes inscritos.</p>
+      {% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}

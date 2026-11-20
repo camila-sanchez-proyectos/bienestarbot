@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% block titulo %}Mi panel · BienestarBot{% endblock %}
+{% block contenido %}
+{% set colores = ['mint', 'peach', 'sky', 'coral', 'butter'] %}
+
+<div class="subnav">
+  <div class="wrap">
+    <span class="subnav-title">Área de Deportes</span>
+    <span class="subnav-sep" aria-hidden="true"></span>
+    <nav class="subnav-links" aria-label="Secciones del panel">
+      {% if mis_inscripciones %}<a href="#mis">Mis inscripciones</a>{% endif %}
+      <a href="#novedades">Novedades</a>
+      <a href="#deportes">Deportes</a>
+      <a href="#eventos">Eventos</a>
+      <a href="#servicios">Servicios y becas</a>
+      <a href="#instalaciones">Instalaciones</a>
+      <a href="#comentarios">Comentarios</a>
+    </nav>
+  </div>
+</div>
+
+<main class="dash">
+  <section class="dash-hero">
+    <div class="wrap">
+      <h1>Hola, {{ current_user.nombre|nombre_corto }}</h1>
+      <span class="badge">{{ current_user.rol }}</span>
+      <p class="lead">Aquí está toda la información del área de Deportes de Bienestar Universitario: entrenadores, horarios, lugares y cupos. Inscríbete desde cada tarjeta. Si tienes una duda, pregúntale a Simón, el gatito de la esquina inferior derecha: te explica los deportes y te ayuda a inscribirte.</p>
+    </div>
+  </section>
+
+  <div class="wrap dash-body">
+
+    {% if mis_inscripciones %}
+    <section class="dsec" id="mis">
+      <h2>Mis inscripciones</h2>
+      <ul class="mine">
+        {% for m in mis_inscripciones %}
+        <li>
+          <span class="mine-name">{{ m.nombre }}</span>
+          <span class="muted">{{ 'Evento' if m.id_evento else 'Deporte' }}</span>
+          <span class="tag">{{ estados.get(m.estado, m.estado) }}</span>
+          {% if m.estado == 'inscrito' %}
+          <form method="post" action="{{ url_for('cancelar') }}">
+            <input type="hidden" name="id" value="{{ m.id_inscripcion }}">
+            <button class="btn btn-danger btn-sm" type="submit">Cancelar inscripción</button>
+          </form>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <section class="dsec" id="novedades">
+      <h2>Novedades</h2>
+      {% if novedades %}
+      <ul class="news">
+        {% for n in novedades %}
+        <li><time>{{ n.fecha_txt }}</time><h3>{{ n.titulo }}</h3><p>{{ n.contenido }}</p></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">Bienestar Universitario todavía no ha publicado novedades.</p>
+      {% endif %}
+    </section>
+
+    <section class="dsec" id="deportes">
+      <h2>Deportes</h2>
+      <p class="intro">Cada deporte muestra su instructor, sus horarios y los cupos que quedan.</p>
+      {% if deportes %}
+      <ul class="sports">
+        {% for d in deportes %}
+        <li>
+          <article class="sport t-{{ colores[loop.index0 % 5] }}">
+            <div class="sport-head">
+              {% if d.imagen %}
+              <img src="{{ url_for('static', filename='img/' ~ d.imagen ~ '.jpg') }}" alt="" width="84" height="84">
+              {% else %}
+              <span class="medal" aria-hidden="true"></span>
+              {% endif %}
+              <div>
+                <h3>{{ d.nombre }}</h3>
+                <div class="tags">
+                  {% if d.categoria %}<span class="tag-soft">{{ d.categoria }}</span>{% endif %}
+                  {% if d.aplica_beca %}<span class="tag-soft tag-beca">Beca deportiva</span>{% endif %}
+                </div>
+                {% if d.descripcion %}<p class="sport-desc">{{ d.descripcion }}</p>{% endif %}
+              </div>
+            </div>
+
+            <dl class="facts">
+              <div>
+                <dt>Instructor</dt>
+                <dd>
+                  {% if d.instructor %}
+                    {{ d.instructor }}
+                    {% if d.contacto %}<br><span class="muted">{{ d.contacto }}</span>{% endif %}
+                  {% else %}Por confirmar con el área de Deportes{% endif %}
+                </dd>
+              </div>
+              <div>
+                <dt>Horarios</dt>
+                <dd>
+                  {% if d.horarios %}
+                  <ul>
+                    {% for h in d.horarios %}
+                    <li>{{ h.dias }} · {{ h.inicio }} a {{ h.fin }} · {{ h.lugar }}</li>
+                    {% endfor %}
+                  </ul>
+                  {% else %}Por confirmar con el área de Deportes{% endif %}
+                </dd>
+              </div>
+            </dl>
+
+            <div>
+              <div class="meter" role="img" aria-label="Cupos ocupados: {{ d.ocupacion }}%"><span style="width: {{ d.ocupacion }}%"></span></div>
+              <p class="meter-text">
+                {% if d.cupos_disponibles <= 0 %}Cupo lleno
+                {% else %}{{ d.cupos_disponibles }} de {{ d.cupo_maximo }} {{ 'cupo libre' if d.cupos_disponibles == 1 else 'cupos libres' }}{% endif %}
+              </p>
+            </div>
+
+            <div class="sport-actions">
+              {% if d.mi %}
+                <span class="tag">{{ estados.get(d.mi.estado, d.mi.estado) }}</span>
+                {% if d.mi.estado == 'inscrito' %}
+                <form method="post" action="{{ url_for('cancelar') }}">
+                  <input type="hidden" name="id" value="{{ d.mi.id_inscripcion }}">
+                  <button class="btn btn-danger btn-sm" type="submit">Cancelar inscripción</button>
+                </form>
+                {% endif %}
+              {% elif not es_estudiante %}
+                <span class="muted">Las inscripciones son para estudiantes.</span>
+              {% elif d.cupos_disponibles <= 0 %}
+                <button class="btn btn-ghost btn-sm" type="button" disabled>Cupo lleno</button>
+              {% else %}
+                <a class="btn btn-primary btn-sm" href="{{ url_for('formulario_inscripcion', tipo='deporte', idn=d.id_deporte) }}">Inscribirme</a>
+              {% endif %}
+            </div>
+          </article>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">Bienestar Universitario todavía no ha publicado deportes.</p>
+      {% endif %}
+    </section>
+
+    <section class="dsec" id="eventos">
+      <h2>Eventos</h2>
+      <section class="carrusel" aria-roledescription="carrusel" aria-label="Afiches de eventos de Bienestar">
+        <div class="car-cabeza">
+          <span class="car-titulo">Así se vive Bienestar</span>
+          <span class="car-contador" aria-hidden="true"></span>
+        </div>
+        <div class="car-viewport" tabindex="0" aria-label="Afiches de eventos. Usa las flechas del teclado para moverte.">
+          <ul class="car-track">
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="1 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 1">
+            <img src="{{ url_for('static', filename='img/eventos/evento-1.jpg') }}" alt="Afiche de la programación general de la Semana Unisimón 2026, del 9 al 13 de noviembre, con las actividades de cada día." width="900" height="1600" loading="eager" decoding="async">
+          </button>
+        </li>
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="2 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 2">
+            <img src="{{ url_for('static', filename='img/eventos/evento-2.jpg') }}" alt="Afiche del Rally Mente: miércoles 11 de noviembre a las 9:00 a. m., para estudiantes de todos los programas; inscripción del 26 al 30 de octubre." width="900" height="1600" loading="eager" decoding="async">
+          </button>
+        </li>
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="3 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 3">
+            <img src="{{ url_for('static', filename='img/eventos/evento-3.jpg') }}" alt="Afiche de la Semana Universitaria: demostraciones de alimentación saludable y concurso Simón Chef 2, lunes 9 de noviembre." width="900" height="1600" loading="eager" decoding="async">
+          </button>
+        </li>
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="4 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 4">
+            <img src="{{ url_for('static', filename='img/eventos/evento-4.jpg') }}" alt="Afiche del Torneo Interno de Fútbol 2026-2, con inscripciones, programación e información en la oficina de Deportes, sede 4." width="900" height="1600" loading="lazy" decoding="async">
+          </button>
+        </li>
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="5 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 5">
+            <img src="{{ url_for('static', filename='img/eventos/evento-5.jpg') }}" alt="Afiche de Jenga de Colores: del 19 al 23 de octubre, en los espacios de deportes de la universidad." width="900" height="1600" loading="lazy" decoding="async">
+          </button>
+        </li>
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="6 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 6">
+            <img src="{{ url_for('static', filename='img/eventos/evento-6.jpg') }}" alt="Afiche de actividades recreativas en los salones: juegos de mesa con Simón; la oficina de Deportes está en la sede 4." width="900" height="1600" loading="lazy" decoding="async">
+          </button>
+        </li>
+        <li class="car-slide" role="group" aria-roledescription="diapositiva" aria-label="7 de 7">
+          <button class="car-ver" type="button" aria-label="Ampliar el afiche 7">
+            <img src="{{ url_for('static', filename='img/eventos/evento-7.jpg') }}" alt="Afiche del Aqua Gym: sesiones de piscina en la sede 4, bloque G, con sus beneficios y requisitos de ingreso." width="900" height="1600" loading="lazy" decoding="async">
+          </button>
+        </li>
+          </ul>
+        </div>
+        <div class="car-barra">
+          <button class="car-btn car-ant" type="button" aria-label="Afiche anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button class="car-btn car-sig" type="button" aria-label="Afiche siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+          <button class="car-btn car-pausa" type="button" aria-pressed="false" aria-label="Pausar el avance automático">
+            <svg class="i-pausa" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
+          </button>
+          <div class="car-puntos"></div>
+        </div>
+      </section>
+      {% if eventos %}
+      <ul class="events">
+        {% for e in eventos %}
+        <li>
+          <article class="event">
+            <h3>{{ e.nombre }}</h3>
+            {% if e.descripcion %}<p>{{ e.descripcion }}</p>{% endif %}
+            <p><strong>Fecha:</strong> {{ e.fecha_txt }}<br><strong>Lugar:</strong> {{ e.lugar }}</p>
+            <p>{% if e.cupos_disponibles <= 0 %}Cupo lleno{% else %}{{ e.cupos_disponibles }} de {{ e.capacidad }} {{ 'cupo libre' if e.cupos_disponibles == 1 else 'cupos libres' }}{% endif %}</p>
+            <div class="event-actions">
+              {% if e.mi %}
+                <span class="tag">{{ estados.get(e.mi.estado, e.mi.estado) }}</span>
+                {% if e.mi.estado == 'inscrito' %}
+                <form method="post" action="{{ url_for('cancelar') }}">
+                  <input type="hidden" name="id" value="{{ e.mi.id_inscripcion }}">
+                  <button class="btn btn-danger btn-sm" type="submit">Cancelar inscripción</button>
+                </form>
+                {% endif %}
+              {% elif not es_estudiante %}
+                <span class="muted">Las inscripciones son para estudiantes.</span>
+              {% elif e.cupos_disponibles <= 0 %}
+                <button class="btn btn-ghost btn-sm" type="button" disabled>Cupo lleno</button>
+              {% else %}
+                <a class="btn btn-primary btn-sm" href="{{ url_for('formulario_inscripcion', tipo='evento', idn=e.id_evento) }}">Inscribirme</a>
+              {% endif %}
+            </div>
+          </article>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
+
+    <section class="dsec" id="servicios">
+      <h2>Servicios y becas</h2>
+      <p class="intro">Gimnasio, piscina, becas deportivas, Juegos ASCUN y cómo contactar al área.</p>
+      <div class="serv-list">
+        {% for sv in servicios %}
+        <details class="serv" id="servicio-{{ sv.id }}">
+          <summary>{{ sv.titulo }} <span>{{ sv.resumen }}</span></summary>
+          <ul>
+            {% for linea in sv.lineas %}
+            <li>{% if linea.startswith('Página: ') %}Página: <a href="{{ contacto.pagina }}" target="_blank" rel="noopener">{{ contacto.pagina }}</a>{% else %}{{ linea }}{% endif %}</li>
+            {% endfor %}
+          </ul>
+        </details>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="dsec" id="instalaciones">
+      <h2>Instalaciones</h2>
+      {% if instalaciones %}
+      <ul class="places">
+        {% for i in instalaciones %}
+        <li><h3>{{ i.nombre }}</h3>{% if i.informacion %}<p>{{ i.informacion }}</p>{% endif %}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">Bienestar Universitario todavía no ha publicado las instalaciones.</p>
+      {% endif %}
+    </section>
+
+    <section class="dsec" id="comentarios">
+      <h2>Comentarios y sugerencias</h2>
+      <p class="intro">Cuéntale a Bienestar qué puede mejorar.</p>
+      <form class="form comment-form" method="post" action="{{ url_for('comentario') }}">
+        <label for="texto">Tu comentario</label>
+        <textarea id="texto" name="texto" rows="4" maxlength="1000" required></textarea>
+        <button class="btn btn-primary" type="submit">Enviar comentario</button>
+      </form>
+    </section>
+  </div>
+</main>
+
+<button class="chat-fab" id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-pop">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+  <span>Hablar con Simón</span>
+</button>
+
+<div class="chat-pop" id="chat-pop" hidden>
+  <section class="chat" aria-label="Chat con Simón" data-login="{{ url_for('login') }}">
+    <div class="chat-head">
+      <span class="medal simon-medalla" role="img" aria-label="Simón"></span>
+      <div>
+        <div class="chat-title">Simón</div>
+        <div class="chat-status"><span class="dot" aria-hidden="true"></span>En línea</div>
+      </div>
+      <button class="chat-close" id="chat-close" type="button" aria-label="Cerrar el chat">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </div>
+    <div class="chat-log" id="chat-log" aria-live="polite"></div>
+    <form class="composer" id="chat-form" autocomplete="off">
+      <input id="chat-input" type="text" maxlength="500" placeholder="Escribe aquí, por ejemplo: horarios" aria-label="Mensaje">
+      <button class="send" type="submit" aria-label="Enviar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='js/carrusel.js') }}?v=1794689376" defer></script>
+{% endblock %}

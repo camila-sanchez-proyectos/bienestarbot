@@ -1,0 +1,16 @@
+# Entorno virtual
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Copias de respaldo
+*.bak
+*.bak[0-9]*
+*.antes_admin
+
+# Configuración local / secretos
+.env

@@ -1,0 +1,65 @@
+/* Simón: lanzador flotante (visitantes y estudiantes) */
+@keyframes simon-float{0%,100%{transform:translateY(0) rotate(-1.2deg)}50%{transform:translateY(-14px) rotate(1.2deg)}}
+@keyframes simon-sombra{0%,100%{transform:scaleX(1);opacity:.9}50%{transform:scaleX(.78);opacity:.5}}
+@keyframes simon-pop{from{opacity:0;transform:translateY(8px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes simon-pulso{0%{box-shadow:0 0 0 0 rgba(31,111,209,.45)}100%{box-shadow:0 0 0 20px rgba(31,111,209,0)}}
+
+.simon{position:relative;display:inline-block}
+.simon img{display:block;width:100%;height:auto;transform-origin:50% 90%;animation:simon-float 3.2s ease-in-out infinite;filter:drop-shadow(0 10px 14px rgba(0,0,0,.25))}
+.simon .sombra{position:absolute;left:18%;right:18%;bottom:-6px;height:14px;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(5px);animation:simon-sombra 3.2s ease-in-out infinite}
+
+/* ---------- Globo de diálogo ---------- */
+.simon-globo{position:relative;padding:16px 20px;border:2px solid #10170E;border-radius:20px;background:#fff;color:#10170E;box-shadow:5px 5px 0 #3ED02A;font-weight:800;font-size:1.15rem;line-height:1.25;animation:simon-pop .6s .3s both}
+.simon-globo small{display:block;margin-top:4px;font-weight:500;font-size:.92rem;color:#4A5847}
+.simon-menu{border-radius:18px 18px 4px 18px}
+
+/* ---------- Opciones de Simón (visitante) ---------- */
+.simon-opciones{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.simon-opciones .op{padding:8px 16px;border:2px solid #10170E;border-radius:999px;background:#fff;color:#10170E;font-family:inherit;font-weight:700;font-size:.92rem;line-height:1.2;text-decoration:none;cursor:pointer}
+.simon-opciones .op.primaria{background:#3ED02A}
+.simon-opciones .op:hover{transform:translateY(-2px)}
+.simon-opciones .op:focus-visible,.simon-fab:focus-visible,.simon-globo .cerrar:focus-visible{outline:3px solid #1F6FD1;outline-offset:3px}
+.simon-dock[hidden],.simon-menu[hidden]{display:none}
+.simon-dock .simon-menu{max-width:min(340px,calc(100vw - 32px));padding:14px 18px}
+
+/* ---------- Lanzador flotante (reemplaza el botón «¿Necesitas ayuda?») ---------- */
+.simon-on .chat-fab{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);padding:0!important;border:0!important;min-height:0!important;opacity:0;pointer-events:none}
+.simon-dock{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:45;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.simon-dock .simon-globo{max-width:min(290px,calc(100vw - 32px));padding:12px 34px 12px 16px;font-size:1.02rem;border-radius:18px 18px 4px 18px;box-shadow:4px 4px 0 #3ED02A;animation-delay:.2s}
+.simon-globo .cerrar{position:absolute;right:6px;top:4px;width:26px;height:26px;border:0;border-radius:50%;background:none;color:#4A5847;font-size:1rem;line-height:1;cursor:pointer}
+.simon-fab{position:relative;display:grid;place-items:center;width:112px;height:112px;padding:0;border:3px solid #1F6FD1;border-radius:50%;background:#fff;cursor:pointer;animation:simon-pulso 2s infinite;box-shadow:0 12px 30px -10px rgba(8,22,6,.5)}
+.simon-fab .simon{width:98px;margin-top:-8px}
+.simon-fab .simon img{animation-duration:2.6s}
+.simon-fab .punto{position:absolute;right:4px;top:4px;display:grid;place-items:center;width:22px;height:22px;border:2px solid #fff;border-radius:50%;background:#E5362B;color:#fff;font-family:inherit;font-weight:800;font-size:.72rem;line-height:1}
+.simon-dock.abierto .punto{display:none}
+.simon-dock.abierto .simon-globo:not(.simon-menu){display:none}
+.simon-dock.abierto .simon-fab{animation:none}
+.simon-on .chat-pop{bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 128px)}
+.chat-head .medal.simon-medalla{background:#fff url("../img/simon.png") center 20%/118% no-repeat}
+
+@media (max-width:720px){
+  .simon-fab{width:92px;height:92px}.simon-fab .simon{width:80px}
+  .simon-on .chat-pop{bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 108px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .simon img,.simon .sombra,.simon-fab,.simon-globo,.simon-opciones .op{animation:none!important}
+}
+
+/* ---------- Simón "escribiendo..." ---------- */
+@keyframes simon-punto{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.msg.typing{display:flex;align-items:center;gap:5px;min-height:38px}
+.punto-escribe{width:7px;height:7px;border-radius:50%;background:#4A5847;animation:simon-punto 1.1s infinite}
+.punto-escribe:nth-child(2){animation-delay:.15s}.punto-escribe:nth-child(3){animation-delay:.3s}
+@media (prefers-reduced-motion:reduce){.punto-escribe{animation:none;opacity:.6}}
+
+/* ---------- Tarjeta de bienvenida dentro del chat ---------- */
+.simon-tarjeta{position:absolute;left:0;right:0;z-index:5;display:flex;padding:12px;background:var(--surface,#fff);overflow:auto}
+.simon-tarjeta[hidden]{display:none}
+.simon-tarjeta .int{margin:auto;width:100%;padding:12px 16px 18px;text-align:center;border:1px solid var(--line,#D8E2D3);border-radius:16px;background:var(--bubble-bot,#fff);animation:simon-pop .45s both}
+.simon-tarjeta img{display:block;margin:0 auto 4px;width:auto;max-width:100%;aspect-ratio:1;object-fit:contain;max-height:var(--simon-img,200px);animation:simon-float 3.4s ease-in-out infinite}
+.simon-tarjeta h3{margin:4px 0 6px;font-size:1.2rem;color:var(--ink,#10170E)}
+.simon-tarjeta p{margin:0 0 14px;color:var(--muted,#4A5847);font-size:.95rem;line-height:1.4}
+.simon-hablemos{padding:10px 24px;border:0;border-radius:999px;background:#2F6FD6;color:#fff;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 6px 18px -6px rgba(47,111,214,.6)}
+.simon-hablemos:hover{background:#2560C0}
+.simon-hablemos:focus-visible{outline:3px solid #9CC0F5;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.simon-tarjeta img,.simon-tarjeta .int{animation:none}}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Novedades · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <div class="toolbar">
+        <h1>Novedades</h1>
+        <a class="btn btn-primary" href="{{ url_for('admin.novedad_nueva') }}">Nueva novedad</a>
+      </div>
+      <p class="intro">Lo que publiques aquí lo ven los estudiantes en su panel y en el chat con Simón.</p>
+      {% if novedades %}
+      <div class="table-wrap">
+        <table class="atable">
+          <thead><tr><th>Título</th><th>Contenido</th><th>Publicada</th><th></th></tr></thead>
+          <tbody>
+            {% for n in novedades %}
+            <tr>
+              <td><strong>{{ n.titulo }}</strong></td>
+              <td>{{ n.contenido|truncate(90) }}</td>
+              <td>{{ n.fecha_publicacion|fecha_hora }}</td>
+              <td><a class="btn btn-ghost btn-sm" href="{{ url_for('admin.novedad_editar', idn=n.id) }}">Editar</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty">Todavía no hay novedades. Publica la primera con el botón «Nueva novedad».</p>
+      {% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}

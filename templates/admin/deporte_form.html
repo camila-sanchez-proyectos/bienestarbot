@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar ' ~ deporte.nombre if deporte else 'Nuevo deporte' }} · Administración · BienestarBot{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block contenido %}
+{% include "admin/_subnav.html" %}
+{% set v = request.form if request.method == 'POST' else (deporte or {}) %}
+<main class="dash">
+  <div class="wrap dash-body">
+    <section class="dsec">
+      <div class="toolbar">
+        <h1>{{ 'Editar ' ~ deporte.nombre if deporte else 'Nuevo deporte' }}</h1>
+        <a class="btn btn-ghost" href="{{ url_for('admin.deportes') }}">Volver a deportes</a>
+      </div>
+
+      <form class="form aform" method="post">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" maxlength="80" required value="{{ v.get('nombre', '') }}">
+        </div>
+        <div class="field">
+          <label for="descripcion">Descripción <span class="hint">(opcional)</span></label>
+          <textarea id="descripcion" name="descripcion" rows="3" maxlength="255">{{ v.get('descripcion') or '' }}</textarea>
+        </div>
+        <div class="field">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" name="categoria" required>
+            <option value="" disabled {% if not v.get('categoria') %}selected{% endif %}>Elige la categoría</option>
+            {% for c in categorias %}<option value="{{ c }}" {% if v.get('categoria') == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="id_instructor">Entrenador</label>
+          <select id="id_instructor" name="id_instructor">
+            <option value="">Sin asignar</option>
+            {% for i in instructores %}<option value="{{ i.id_instructor }}" {% if v.get('id_instructor')|string == i.id_instructor|string %}selected{% endif %}>{{ i.nombre }}{% if i.especialidad %} · {{ i.especialidad }}{% endif %}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="cupo_maximo">Cupo máximo</label>
+          <input id="cupo_maximo" name="cupo_maximo" type="number" min="{{ n_ocupados or 1 }}" max="500" required value="{{ v.get('cupo_maximo', 30) }}">
+          {% if deporte %}<span class="hint">Hay {{ n_ocupados }} {{ 'estudiante inscrito' if n_ocupados == 1 else 'estudiantes inscritos' }} ahora mismo.</span>{% endif %}
+        </div>
+        <label class="check"><input type="checkbox" name="aplica_beca" value="1" {% if v.get('aplica_beca') %}checked{% endif %}><span>Este deporte aplica para beca deportiva.</span></label>
+        <button class="btn btn-primary" type="submit">{{ 'Guardar cambios' if deporte else 'Crear deporte' }}</button>
+      </form>
+    </section>
+
+    {% if deporte %}
+    <section class="dsec" id="horarios">
+      <h2>Horarios</h2>
+      {% if horarios %}
+      <div class="table-wrap">
+        <table class="atable">
+          <thead><tr><th>Día</th><th>Hora</th><th>Lugar</th><th></th></tr></thead>
+          <tbody>
+            {% for h in horarios %}
+            <tr>
+              <td>{{ h.dia_semana }}</td>
+              <td>{{ h.hora_inicio|hhmm }} a {{ h.hora_fin|hhmm }}</td>
+              <td>{{ h.lugar }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin.horario_quitar', idn=deporte.id_deporte) }}">
+                  <input type="hidden" name="dia_semana" value="{{ h.dia_semana }}">
+                  <input type="hidden" name="hora_inicio" value="{{ h.hora_inicio|hhmm }}">
+                  <input type="hidden" name="hora_fin" value="{{ h.hora_fin|hhmm }}">
+                  <input type="hidden" name="id_instalacion" value="{{ h.id_instalacion }}">
+                  <button class="btn btn-danger btn-sm" type="submit">Quitar</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty">Este deporte todavía no tiene horarios.</p>
+      {% endif %}
+
+      <form class="form aform aform-inline" method="post" action="{{ url_for('admin.horario_agregar', idn=deporte.id_deporte) }}">
+        <h3>Agregar un horario</h3>
+        <div class="field">
+          <label for="dia_semana">Día</label>
+          <select id="dia_semana" name="dia_semana" required>
+            {% for d in dias %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field"><label for="hora_inicio">Hora de inicio</label><input id="hora_inicio" name="hora_inicio" type="time" required></div>
+        <div class="field"><label for="hora_fin">Hora de fin</label><input id="hora_fin" name="hora_fin" type="time" required></div>
+        <div class="field">
+          <label for="id_instalacion">Lugar</label>
+          <select id="id_instalacion" name="id_instalacion" required>
+            {% for i in instalaciones %}<option value="{{ i.id_instalacion }}">{{ i.nombre }}</option>{% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Agregar horario</button>
+      </form>
+    </section>
+
+    <section class="dsec">
+      <h2>Eliminar deporte</h2>
+      <p class="intro">Solo se puede eliminar un deporte que nunca tuvo inscripciones. Si ya las tiene, el sistema lo impide para conservar el historial.</p>
+      <form method="post" action="{{ url_for('admin.deporte_eliminar', idn=deporte.id_deporte) }}" onsubmit="return confirm('¿Eliminar {{ deporte.nombre|e }} y sus horarios? Esta acción no se puede deshacer.')">
+        <button class="btn btn-danger" type="submit">Eliminar {{ deporte.nombre }}</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
